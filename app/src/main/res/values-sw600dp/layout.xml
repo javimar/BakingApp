@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<!-- SUBSTITUTE phone layouts when in tablet mode -->
+<resources>
+
+    <item name="recipe_detail_fragment" type="layout">@layout/recipe_detail_fragment_dual</item>
+    <item name="recipe_step_detail_view" type="layout">@layout/recipe_step_detail_view_dual</item>
+    <item name="recipe_step_detail_fragment" type="layout">@layout/recipe_step_detail_fragment_dual</item>
+
+</resources>

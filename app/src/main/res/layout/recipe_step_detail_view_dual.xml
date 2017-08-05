@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    app:layout_behavior="@string/appbar_scrolling_view_behavior">
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        <com.google.android.exoplayer2.ui.SimpleExoPlayerView
+            android:id="@+id/playerView"
+            android:layout_width="match_parent"
+            android:layout_height="300dp"
+            android:layout_margin="16dp"/>
+        <ImageView
+            android:id="@+id/iv_no_video"
+            android:layout_width="match_parent"
+            android:layout_height="300dp"
+            android:layout_margin="16dp"
+            android:visibility="gone"
+            app:srcCompat="@drawable/no_video"
+            android:contentDescription="@string/cd_no_video" />
+    </FrameLayout>
+
+
+    <android.support.v7.widget.CardView
+        xmlns:card_view="http://schemas.android.com/tools"
+        android:id="@+id/cv_step_detail_card"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_margin="16dp"
+        app:cardBackgroundColor="@color/white"
+        card_view:cardCornerRadius="6dp"
+        card_view:cardElevation="6dp">
+        <TextView
+            android:id="@+id/tv_step_detail_description"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="start"
+            android:padding="16dp"
+            android:textAppearance="@style/Base.TextAppearance.AppCompat.Large"
+            android:textColor="@color/primary_text"
+            tools:text="Prepare oven and bla bla bla" />
+    </android.support.v7.widget.CardView>
+
+</LinearLayout>
