@@ -18,10 +18,13 @@
     <!-- STEP DETAIL VIEW FRAGMENT STRINGS -->
     <string name="detail_step_pager_strip">STEP </string>
 
-    <!-- STEP DETAIL FRAGMENT STRINGS -->
+    <!-- INGREDIENT DETAIL FRAGMENT STRINGS -->
     <string name="detail_ingredients">%1$s %2$s of %3$s</string>
     <string name="detail_step_ingredients_card">INGREDIENTS LIST </string>
     <string name="detail_step_servings">Makes %1$d servings</string>
+
+    <!-- STEP DETAIL FRAGMENT STRINGS -->
+    <string name="detail_step_empty">Select a step from the list to view its detail</string>
 
     <!-- WIDGET STRINGS -->
     <string name="widget_title">Recipe: %s</string>

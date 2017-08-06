@@ -45,7 +45,6 @@ public class RecipeDetailViewFragment extends Fragment implements
         View viewGroup = inflater.inflate(R.layout.recipe_detail_view, container, false);
         ButterKnife.bind(this, viewGroup);
 
-
         return viewGroup;
     }
 
@@ -55,9 +54,11 @@ public class RecipeDetailViewFragment extends Fragment implements
     {
         super.onActivityCreated(savedInstanceState);
 
+        // make the card white for tablets (cosmetically better)
         if(sDualFragments)
             mTvCard.setCardBackgroundColor(fetchColor(getActivity(), R.color.white));
 
+        // set up adapter to display RecyclerView for step list
         mRecyclerViewSteps.setHasFixedSize(true);
         mRecyclerViewSteps.setLayoutManager(new LinearLayoutManager(getActivity()));
         StepListAdapter adapter = new StepListAdapter(this, mRecipe);
@@ -65,7 +66,7 @@ public class RecipeDetailViewFragment extends Fragment implements
     }
 
 
-    // Called from Detail Activity to get the ingredients from the recipe
+    // Called from Detail Activity to fill the ingredients for the recipe
     public void displayRecipeDetail(Recipe recipe)
     {
         // get the recipe
@@ -92,16 +93,16 @@ public class RecipeDetailViewFragment extends Fragment implements
         }
     }
 
-
+    // from StepListAdapter, it brings the step being clicked
     @Override
     public void onStepItemClick(Step step)
     {
-        // communicate back the Step from the adapter to the caller
+        // communicate back the Step from the adapter to RecipeDetailViewActivity
         this.mStepSelectedListener.onItemStepSelected(step);
     }
 
 
-    // RecipeDetailViewActivity must implement this interface since it passes the step to it
+    // RecipeDetailViewActivity must implement this interface so it can deliver the step to it
     public interface OnItemStepSelectedListener
     {
         void onItemStepSelected(Step step);

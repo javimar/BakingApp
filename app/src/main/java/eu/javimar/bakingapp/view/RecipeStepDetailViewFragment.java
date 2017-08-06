@@ -68,17 +68,18 @@ public class RecipeStepDetailViewFragment extends Fragment implements
     }
 
 
-    public static RecipeStepDetailViewFragment newRecipeStepDetailViewFragment() {
-        return new RecipeStepDetailViewFragment();
-    }
-
-
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
 
-        // This is only executed on viewpager swipe
+        if (savedInstanceState != null)
+        {
+            // Restore last state if activity was destroyed on a creen rotation
+            mStep = savedInstanceState.getParcelable(STEP_ITEM_PARCEABLE_TAG);
+        }
+
+        // This is only executed on handsets
         if(!sDualFragments)
         {
             Bundle args = getArguments();
@@ -97,6 +98,15 @@ public class RecipeStepDetailViewFragment extends Fragment implements
 
 
     @Override
+    public void onSaveInstanceState(Bundle outState)
+    {
+        // save step when rotate the screen
+        super.onSaveInstanceState(outState);
+        outState.putParcelable(STEP_ITEM_PARCEABLE_TAG, mStep);
+    }
+
+
+    @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState)
     {
         super.onActivityCreated(savedInstanceState);
@@ -111,7 +121,7 @@ public class RecipeStepDetailViewFragment extends Fragment implements
         }
         else
         {
-            // one of the two, of not, url will be empty.
+            // one of the two, if not, url will be empty.
             String url = mStep.getmVideoUrl();
             if(url.isEmpty())
                 url = mStep.getmThumbnailUrl();
@@ -133,6 +143,13 @@ public class RecipeStepDetailViewFragment extends Fragment implements
             }
         }
 
+    }
+
+
+    // Step info is going to be provided in here only in tablet view
+    public void displayStepDetailView(Step step)
+    {
+        mStep = step;
     }
 
 
@@ -299,13 +316,4 @@ public class RecipeStepDetailViewFragment extends Fragment implements
             mExoPlayer = null;
         }
     }
-
-    // Step info is going to be provided in here only in tablet view
-    public void displayStepDetailView(Step step)
-    {
-        mStep = step;
-
-Log.e(TAG, "JAVIER en displayStepDetailView = " + step.getmDescription());
-    }
-
 }

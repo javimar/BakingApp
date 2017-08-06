@@ -5,7 +5,6 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.os.Parcelable;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 import android.view.View;
 
 import java.util.ArrayList;
@@ -47,27 +46,26 @@ public class RecipeDetailViewActivity extends AppCompatActivity
         // set title with name of recipe
         setTitle(mRecipe.getmRecipeName());
 
-        // Take the info from the intent and deliver it to the fragment so it can update
+        // deliver Recipe to the left fragment so it can update
         mRecipeDetailViewFragment = (RecipeDetailViewFragment)
-                getFragmentManager().findFragmentById(R.id.recipe_detail_view_fragment);
+                getFragmentManager().findFragmentById(R.id.recipe_detail_fragment);
         mRecipeDetailViewFragment.displayRecipeDetail(mRecipe);
-        // Set the listener to receive Step clicked
+        // set the listener to receive the correct Step being clicked
         mRecipeDetailViewFragment.setItemStepListener(this);
 
-        // Check if fragment step detail view is active and visible
-        View stepDetailsFrame = findViewById(R.id.recipe_step_detail_view_fragment);
-        sDualFragments = stepDetailsFrame != null && stepDetailsFrame.getVisibility() == View.VISIBLE;
+        // check if fragment (on the right in tablets) step detail view is active and visible
+        View stepDetailsFrame = findViewById(R.id.recipe_step_detail_fragment);
+        sDualFragments = stepDetailsFrame != null &&
+                stepDetailsFrame.getVisibility() == View.VISIBLE;
     }
 
 
     @Override
     public void onItemStepSelected(Step step)
     {
-Log.e(LOG_TAG, "JAVIER step= " + step.getmStepId());
-
         if(step != null)
         {
-            if (!sDualFragments) // phone view
+            if (!sDualFragments) // handset view
             {
                 Intent intent = new Intent(this, RecipeStepDetailViewActivity.class);
                 // pass the step arraylist, the step, and the recipe name for the title
@@ -80,22 +78,24 @@ Log.e(LOG_TAG, "JAVIER step= " + step.getmStepId());
             }
             else // tablet view
             {
-                RecipeStepDetailViewFragment mFragmentStepDetail =
+                RecipeStepDetailViewFragment fragmentStepDetail =
                         (RecipeStepDetailViewFragment)getSupportFragmentManager()
-                        .findFragmentById(R.id.recipe_step_detail_view_fragment);
-                if (mFragmentStepDetail == null) // first time on click is null
+                                .findFragmentById(R.id.recipe_step_detail_fragment);
+                if(fragmentStepDetail == null)
                 {
-                    // add fragment programmatically to the framelayout
-                    mFragmentStepDetail = new RecipeStepDetailViewFragment();
-                    mFragmentStepDetail.displayStepDetailView(step);
-
-                    getSupportFragmentManager()
-                            .beginTransaction()
-                            .add(R.id.recipe_step_detail_view_fragment, mFragmentStepDetail)
-                            .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE)
-                            .commit();
+                    // hide the empty step textview
+                    findViewById(R.id.text_empty_detail).setVisibility(View.GONE);
                 }
-                mFragmentStepDetail.displayStepDetailView(step);
+                // add fragment programmatically to the framelayout
+                fragmentStepDetail =
+                        new RecipeStepDetailViewFragment();
+                // pass the correct step to visualize
+                fragmentStepDetail.displayStepDetailView(step);
+                getSupportFragmentManager()
+                        .beginTransaction()
+                        .replace(R.id.recipe_step_detail_fragment, fragmentStepDetail)
+                        .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE)
+                        .commit();
             }
         }
     }
