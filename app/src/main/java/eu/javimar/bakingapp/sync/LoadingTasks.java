@@ -58,6 +58,7 @@ import eu.javimar.bakingapp.model.Recipe;
 import eu.javimar.bakingapp.model.Step;
 
 import static eu.javimar.bakingapp.MainActivity.master_list;
+import static eu.javimar.bakingapp.utils.HelperUtils.deletesStepNumber;
 import static eu.javimar.bakingapp.utils.HelperUtils.loadJSONFromAsset;
 import static eu.javimar.bakingapp.utils.HelperUtils.storeIngredientsInPreferences;
 
@@ -133,13 +134,15 @@ public class LoadingTasks
                 for(int k = 0; k < stepArray.length(); k++)
                 {
                     JSONObject currentStep = stepArray.getJSONObject(k);
-                    stepId = currentStep.getInt("id");
+                    stepId = k;
                     stepShortDescription = currentStep.getString("shortDescription");
                     stepDescription = currentStep.getString("description");
                     stepVideoUrl = currentStep.getString("videoURL");
                     stepThumbnailUrl = currentStep.getString("thumbnailURL");
+
                     stepList.add(new Step(stepId, stepShortDescription,
-                            stepDescription, stepVideoUrl, stepThumbnailUrl));
+                            deletesStepNumber(stepDescription),
+                            stepVideoUrl, stepThumbnailUrl));
                 }
                 servings = currentRecipe.getInt("servings");
                 recipeImage = currentRecipe.getString("image");

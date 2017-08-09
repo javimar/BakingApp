@@ -56,7 +56,7 @@ public class BakingApplication extends Application
     public void onCreate()
     {
         super.onCreate();
-        // execute only once at startup
+        // execute only once at startup to load the recipes from the assets folder
         Intent loadRecipesIntent = new Intent(getApplicationContext(), LoaderIntentService.class);
         loadRecipesIntent.setAction(LoadingTasks.ACTION_LOAD_RECIPES);
         startService(loadRecipesIntent);

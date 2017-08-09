@@ -87,4 +87,11 @@ public final class HelperUtils
         return allEntries.keySet();
     }
 
+    public static String deletesStepNumber(String string)
+    {
+        // Remove all numbers from steps
+        return string.replaceAll("(^\\d\\.|\\d\\d\\.)", "");
+    }
+
+
 }

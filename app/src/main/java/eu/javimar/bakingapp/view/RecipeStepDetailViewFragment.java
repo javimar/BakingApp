@@ -3,7 +3,6 @@ package eu.javimar.bakingapp.view;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -53,6 +52,9 @@ public class RecipeStepDetailViewFragment extends Fragment implements
 {
     private static String TAG = RecipeStepDetailViewFragment.class.getName();
 
+    private static String VIDEO_PLAYER_STATE = "player_state";
+    private long videoCurrentPosition;
+
     @BindView(R.id.playerView) SimpleExoPlayerView mPlayerView;
     @BindView(R.id.tv_step_detail_description) TextView mTvStep;
     @BindView(R.id.iv_no_video) ImageView mIvNoVideo;
@@ -62,7 +64,6 @@ public class RecipeStepDetailViewFragment extends Fragment implements
     private PlaybackStateCompat.Builder mStateBuilder;
 
     private Step mStep;
-
 
     public RecipeStepDetailViewFragment() {
     }
@@ -78,12 +79,14 @@ public class RecipeStepDetailViewFragment extends Fragment implements
             // Restore last state if activity was destroyed on a creen rotation
             mStep = savedInstanceState.getParcelable(STEP_ITEM_PARCEABLE_TAG);
         }
-
-        // This is only executed on handsets
-        if(!sDualFragments)
+        else
         {
-            Bundle args = getArguments();
-            mStep = args.getParcelable(STEP_ITEM_PARCEABLE_TAG);
+            // This is only executed on handsets
+            if(!sDualFragments)
+            {
+                Bundle args = getArguments();
+                mStep = args.getParcelable(STEP_ITEM_PARCEABLE_TAG);
+            }
         }
     }
 
@@ -100,9 +103,17 @@ public class RecipeStepDetailViewFragment extends Fragment implements
     @Override
     public void onSaveInstanceState(Bundle outState)
     {
-        // save step when rotate the screen
+        // save step when rotating the screen
         super.onSaveInstanceState(outState);
         outState.putParcelable(STEP_ITEM_PARCEABLE_TAG, mStep);
+
+        // save playing status of the player
+        if(mExoPlayer != null)
+        {
+            videoCurrentPosition = mExoPlayer.getCurrentPosition();
+            outState.putLong(VIDEO_PLAYER_STATE, videoCurrentPosition);
+        }
+
     }
 
 
@@ -140,9 +151,15 @@ public class RecipeStepDetailViewFragment extends Fragment implements
                 mIvNoVideo.setVisibility(View.GONE);
                 // initialize the player
                 initializePlayer(Uri.parse(url));
+
+                if (savedInstanceState != null)
+                {
+                    // restore player position
+                    videoCurrentPosition = savedInstanceState.getLong(VIDEO_PLAYER_STATE, 0);
+                    mExoPlayer.seekTo(videoCurrentPosition);
+                }
             }
         }
-
     }
 
 
@@ -163,7 +180,7 @@ public class RecipeStepDetailViewFragment extends Fragment implements
                 MediaSessionCompat.FLAG_HANDLES_MEDIA_BUTTONS |
                         MediaSessionCompat.FLAG_HANDLES_TRANSPORT_CONTROLS);
 
-        // Do not let MediaButtons restart the player when the app is not visible.
+        // Do not let +MediaButtons restart the player when the app is not visible.
         sMediaSession.setMediaButtonReceiver(null);
 
         // Set an initial PlaybackState with ACTION_PLAY, so media buttons can start the player.

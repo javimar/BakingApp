@@ -16,7 +16,12 @@ import eu.javimar.bakingapp.view.RecipeStepDetailViewFragment;
 
 import static eu.javimar.bakingapp.MainActivity.RECIPE_ITEM_PARCEABLE;
 
-
+/**
+ * This activity already has a Recipe selected, and will decide whether we are using
+ * a handset or a tablet device, passing the necessary info to the activity (handset)
+ * or creating a detail fragment for tablets, that will display a list of ingredients
+ * and a list of steps to bake the recipe
+ */
 public class RecipeDetailViewActivity extends AppCompatActivity
         implements RecipeDetailViewFragment.OnItemStepSelectedListener
 {

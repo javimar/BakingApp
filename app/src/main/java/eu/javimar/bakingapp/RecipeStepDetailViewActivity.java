@@ -30,6 +30,7 @@ import static eu.javimar.bakingapp.RecipeDetailViewActivity.STEP_ITEM_PARCEABLE_
  *  RecipeStepDetailViewActivity is never used on a tablet. It is a container to
  *  present RecipeStepDetailViewFragment, so it is only used on phones where the
  *  two fragments are displayed separately.
+ *  It does implement the swipe functionality to navigate through the steps
  */
 public class RecipeStepDetailViewActivity extends AppCompatActivity
 {
@@ -56,15 +57,12 @@ public class RecipeStepDetailViewActivity extends AppCompatActivity
         mStepList = getIntent().getParcelableArrayListExtra(STEP_ARRAY_TAG);
         mStep = getIntent().getParcelableExtra(STEP_ITEM_PARCEABLE_TAG);
 
-        // Send the step to the fragment only when clicking in the step list
-        // ?????
-
-
-
-
         // Set up View Pager to swipe horizontally through the Steps
         mPagerAdapter = new PagerAdapter(getSupportFragmentManager());
         mViewPager.setAdapter(mPagerAdapter);
+
+        // Send the correct Step clicked
+        mViewPager.setCurrentItem(mStep.getmStepId());
     }
 
     private class PagerAdapter extends FragmentStatePagerAdapter {
@@ -77,7 +75,6 @@ public class RecipeStepDetailViewActivity extends AppCompatActivity
         {
             Fragment fragment = new RecipeStepDetailViewFragment();
             Bundle args = new Bundle();
-            // Send the correct Step
             args.putParcelable(STEP_ITEM_PARCEABLE_TAG, mStepList.get(position));
             fragment.setArguments(args);
             return fragment;
@@ -96,7 +93,7 @@ public class RecipeStepDetailViewActivity extends AppCompatActivity
     }
 
 
-
+    // Display all screen for the video
     @TargetApi(Build.VERSION_CODES.KITKAT)
     @Override
     public void onWindowFocusChanged(boolean hasFocus)
