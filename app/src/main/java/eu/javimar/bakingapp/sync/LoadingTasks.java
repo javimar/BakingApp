@@ -59,6 +59,7 @@ import eu.javimar.bakingapp.model.Step;
 
 import static eu.javimar.bakingapp.MainActivity.master_list;
 import static eu.javimar.bakingapp.utils.HelperUtils.loadJSONFromAsset;
+import static eu.javimar.bakingapp.utils.HelperUtils.storeIngredientsInPreferences;
 
 @SuppressWarnings("all")
 public class LoadingTasks
@@ -74,13 +75,13 @@ public class LoadingTasks
         switch (action)
         {
             case ACTION_LOAD_RECIPES:
-                loadRecipes(context);
+                loadRecipesIntoList(context);
                 break;
         }
     }
 
 
-    private static void loadRecipes(final Context context)
+    private static void loadRecipesIntoList(final Context context)
     {
         // Clear and instantiate a new master list of Recipes
         master_list = null;
@@ -88,9 +89,8 @@ public class LoadingTasks
 
         List<Step> stepList = null;
         List<Ingredient> ingredientList = null;
-        double quantity;
         int recipeId, servings, stepId;
-        String recipeImage, recipeName, measure, ingredient,
+        String recipeImage, recipeName, measure, ingredient, quantity,
                 stepShortDescription, stepDescription, stepVideoUrl, stepThumbnailUrl;
 
         // load json file into an array
@@ -110,15 +110,25 @@ public class LoadingTasks
                 recipeName = currentRecipe.getString("name");
 
                 JSONArray ingredientsArray = currentRecipe.getJSONArray("ingredients");
+
+                // process the ingredients
+                ArrayList<String> ingredients = new ArrayList<>();
                 for(int j = 0; j < ingredientsArray.length(); j++)
                 {
                     JSONObject currentIngredient = ingredientsArray.getJSONObject(j);
-                    quantity = currentIngredient.getDouble("quantity");
+                    // Get rid of values ending in .0
+                    quantity = String.valueOf(currentIngredient.getDouble("quantity"))
+                            .replace(".0", "");
                     measure = currentIngredient.getString("measure");
                     ingredient = currentIngredient.getString("ingredient");
                     ingredientList.add(new Ingredient(quantity, measure, ingredient));
+                    ingredients.add(quantity + " " + measure + " " + ingredient);
                 }
+                // Save the recipe and its ingredients in preferences for the widget
+                storeIngredientsInPreferences(context, recipeName, ingredients);
+                ingredients = null;
 
+                // process the steps
                 JSONArray stepArray = currentRecipe.getJSONArray("steps");
                 for(int k = 0; k < stepArray.length(); k++)
                 {

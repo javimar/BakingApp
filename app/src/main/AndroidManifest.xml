@@ -1,5 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
-
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="eu.javimar.bakingapp">
 
@@ -13,34 +12,37 @@
         android:label="@string/app_name"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-
         <activity
             android:name=".MainActivity"
             android:launchMode="singleTop"
             android:theme="@style/AppTheme.NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-
         <activity
             android:name=".RecipeDetailViewActivity"
             android:launchMode="singleTop"
             android:parentActivityName=".MainActivity">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="eu.javimar.bakingapp.MainActivity">
-            </meta-data>
+                android:value="eu.javimar.bakingapp.MainActivity"></meta-data>
         </activity>
-
         <activity
             android:name=".RecipeStepDetailViewActivity"
             android:parentActivityName=".RecipeDetailViewActivity">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="eu.javimar.bakingapp.RecipeDetailViewActivity">
-            </meta-data>
+                android:value="eu.javimar.bakingapp.RecipeDetailViewActivity"></meta-data>
+        </activity>
+
+        <activity
+            android:name=".widget.RecipeWidgetProviderConfigureActivity">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_CONFIGURE" />
+            </intent-filter>
         </activity>
 
         <receiver android:name=".view.RecipeStepDetailViewFragment$MediaReceiver">
@@ -51,12 +53,23 @@
 
         <service
             android:name=".sync.LoaderIntentService"
-            android:exported="false"/>
+            android:exported="false" />
+
+        <receiver android:name=".widget.RecipeWidgetProvider">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/recipe_widget_provider_info" />
+        </receiver>
 
         <service
             android:name=".widget.RecipeWidgetRemoteViewsService"
             android:exported="false"
             android:permission="android.permission.BIND_REMOTEVIEWS" />
+
 
     </application>
 

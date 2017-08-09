@@ -27,9 +27,9 @@
     <string name="detail_step_empty">Select a step from the list to view its detail</string>
 
     <!-- WIDGET STRINGS -->
-    <string name="widget_title">Recipe: %s</string>
     <string name="widget_empty_list">No recipes to view!</string>
-
+    <string name="widget_configure">Select a recipe</string>
+    <string name="widget_add">Add widget</string>
 
 
 </resources>

@@ -6,19 +6,19 @@ import android.os.Parcelable;
 
 public class Ingredient implements Parcelable
 {
-    private double mQuantity;
+    private String mQuantity;
     private String mMeasureUnit;
     private String mIngredientName;
 
 
-    public Ingredient(double mQuantity, String mMeasureUnit, String mIngredientName)
+    public Ingredient(String mQuantity, String mMeasureUnit, String mIngredientName)
     {
         this.mQuantity = mQuantity;
         this.mMeasureUnit = mMeasureUnit;
         this.mIngredientName = mIngredientName;
     }
 
-    public double getmQuantity() {
+    public String getmQuantity() {
         return mQuantity;
     }
 
@@ -37,13 +37,13 @@ public class Ingredient implements Parcelable
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
-        dest.writeDouble(this.mQuantity);
+        dest.writeString(this.mQuantity);
         dest.writeString(this.mMeasureUnit);
         dest.writeString(this.mIngredientName);
     }
 
     protected Ingredient(Parcel in) {
-        this.mQuantity = in.readDouble();
+        this.mQuantity = in.readString();
         this.mMeasureUnit = in.readString();
         this.mIngredientName = in.readString();
     }

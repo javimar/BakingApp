@@ -76,12 +76,8 @@ public class RecipeDetailViewFragment extends Fragment implements
             int num = recipe.getmIngredientsList().size();
             for(int i = 0; i < num; i++)
             {
-                String qty = String.valueOf(recipe.getmIngredientsList().get(i).getmQuantity());
-                if(qty.endsWith(".0"))
-                    qty = qty.replace(".0", "");
-
                 mTvIngredientsList.append(String.format(getString(R.string.detail_ingredients),
-                        qty,
+                        recipe.getmIngredientsList().get(i).getmQuantity(),
                         recipe.getmIngredientsList().get(i).getmMeasureUnit(),
                         recipe.getmIngredientsList().get(i).getmIngredientName()));
                 // skip last newline
