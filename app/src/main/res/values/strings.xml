@@ -2,8 +2,6 @@
 
     <string name="app_name">Baking app</string>
 
-    <!-- MENU -->
-
     <!-- ERROR -->
     <string name="no_internet_connection">There is no Internet connection</string>
 
@@ -30,6 +28,5 @@
     <string name="widget_empty_list">No recipes to view!</string>
     <string name="widget_configure">Select a recipe</string>
     <string name="widget_add">Add widget</string>
-
 
 </resources>

@@ -317,8 +317,10 @@ public class RecipeStepDetailViewFragment extends Fragment implements
     {
         super.onDestroy();
         releasePlayer();
-        sMediaSession.setActive(false);
+        if(sMediaSession != null)
+            sMediaSession.setActive(false);
     }
+
 
 
     /**
