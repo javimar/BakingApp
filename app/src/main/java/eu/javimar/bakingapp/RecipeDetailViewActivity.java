@@ -58,10 +58,8 @@ public class RecipeDetailViewActivity extends AppCompatActivity
         // set the listener to receive the correct Step being clicked
         mRecipeDetailViewFragment.setItemStepListener(this);
 
-        // check if fragment (on the right in tablets) step detail view is active and visible
-        View stepDetailsFrame = findViewById(R.id.recipe_step_detail_fragment);
-        sDualFragments = stepDetailsFrame != null &&
-                stepDetailsFrame.getVisibility() == View.VISIBLE;
+        // check if we are on a handset or on a tablet
+        sDualFragments = !getResources().getBoolean(R.bool.isPhone);
     }
 
 

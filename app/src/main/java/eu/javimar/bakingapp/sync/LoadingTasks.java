@@ -50,12 +50,16 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
 import eu.javimar.bakingapp.model.Ingredient;
 import eu.javimar.bakingapp.model.Recipe;
 import eu.javimar.bakingapp.model.Step;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
 
 import static eu.javimar.bakingapp.MainActivity.master_list;
 import static eu.javimar.bakingapp.utils.HelperUtils.deletesStepNumber;
@@ -67,7 +71,10 @@ public class LoadingTasks
 {
     private static final String LOG_TAG = LoadingTasks.class.getSimpleName();
 
-    /** ACTIONS TO PERFORM */
+    // URL for the recipes json
+    private static String RECIPES_URL = "https://d17h27t6h515a5.cloudfront.net/topher/2017/May/59121517_baking/baking.json";
+
+    // ACTIONS TO PERFORM
     public static final String ACTION_LOAD_RECIPES= "load_recipes";
 
 
@@ -94,11 +101,17 @@ public class LoadingTasks
         String recipeImage, recipeName, measure, ingredient, quantity,
                 stepShortDescription, stepDescription, stepVideoUrl, stepThumbnailUrl;
 
-        // load json file into an array
-        String recipesJson = loadJSONFromAsset(context);
-        try
+        // establish connection with the server
+        OkHttpClient client = new OkHttpClient();
+        Request request = new Request.Builder()
+                .url(RECIPES_URL)
+                .build();
+
+        String recipesJson;
+        try (Response response = client.newCall(request).execute())
         {
-            // baking.json is an array of JSON objects of type Recipe
+            recipesJson = response.body().string();
+            //  array of JSON objects of type Recipe
             JSONArray recipesArray = new JSONArray(recipesJson);
 
             for(int i = 0; i < recipesArray.length(); i++)
@@ -151,6 +164,10 @@ public class LoadingTasks
                 master_list.add(new Recipe(recipeId, recipeName,
                         ingredientList, stepList, servings, recipeImage));
             }
+        }
+        catch (IOException e)
+        {
+            Log.e(LOG_TAG, "Problem accessing the server while loading the Recipes", e);
         }
         catch (JSONException e)
         {

@@ -4,10 +4,10 @@
     android:layout_width="match_parent"
     android:layout_height="?android:attr/listPreferredItemHeight"
     android:orientation="horizontal"
-    android:paddingEnd="16dp"
-    android:paddingLeft="16dp"
-    android:paddingRight="16dp"
-    android:paddingStart="16dp">
+    android:paddingEnd="@dimen/layout_padding"
+    android:paddingLeft="@dimen/layout_padding"
+    android:paddingRight="@dimen/layout_padding"
+    android:paddingStart="@dimen/layout_padding">
 
     <TextView
         android:id="@+id/tv_step_number"
@@ -19,7 +19,7 @@
         android:gravity="center"
         android:layout_gravity="center_vertical"
         android:textColor="@color/primary_text"
-        android:textSize="16sp"
+        android:textSize="@dimen/text_size_recycler"
         tools:text="1" />
 
     <TextView
@@ -29,9 +29,9 @@
         android:layout_gravity="center_vertical"
         android:ellipsize="end"
         android:maxLines="2"
-        android:layout_marginStart="16dp"
+        android:layout_marginStart="@dimen/layout_padding"
         android:fontFamily="sans-serif-medium"
-        android:textSize="16sp"
+        android:textSize="@dimen/text_size_recycler"
         tools:text="Coge la masa y dale caña" />
 
 </LinearLayout>

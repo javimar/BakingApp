@@ -10,13 +10,12 @@ import android.support.v4.app.Fragment;
 import android.support.v4.media.session.MediaButtonReceiver;
 import android.support.v4.media.session.MediaSessionCompat;
 import android.support.v4.media.session.PlaybackStateCompat;
-import android.util.Log;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.google.android.exoplayer2.DefaultLoadControl;
 import com.google.android.exoplayer2.ExoPlaybackException;
@@ -35,6 +34,7 @@ import com.google.android.exoplayer2.trackselection.TrackSelector;
 import com.google.android.exoplayer2.ui.SimpleExoPlayerView;
 import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory;
 import com.google.android.exoplayer2.util.Util;
+import com.squareup.picasso.Picasso;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -43,21 +43,24 @@ import eu.javimar.bakingapp.model.Step;
 
 import static eu.javimar.bakingapp.RecipeDetailViewActivity.STEP_ITEM_PARCEABLE_TAG;
 import static eu.javimar.bakingapp.RecipeDetailViewActivity.sDualFragments;
-import static eu.javimar.bakingapp.RecipeStepDetailViewActivity.STEP_ITEM_PARCEABLE_TAG_ONCLICK;
 import static eu.javimar.bakingapp.utils.HelperUtils.isNetworkAvailable;
+import static eu.javimar.bakingapp.utils.HelperUtils.isPicture;
+import static eu.javimar.bakingapp.utils.HelperUtils.showSnackbar;
 
-
+/**
+ * Displays a detailed step with the video instructions
+ */
 public class RecipeStepDetailViewFragment extends Fragment implements
         ExoPlayer.EventListener
 {
     private static String TAG = RecipeStepDetailViewFragment.class.getName();
 
     private static String VIDEO_PLAYER_STATE = "player_state";
-    private long videoCurrentPosition;
+    private long mVideoCurrentPosition;
 
-    @BindView(R.id.playerView) SimpleExoPlayerView mPlayerView;
+    @BindView(R.id.pv_player_view_step) SimpleExoPlayerView mPlayerViewStep;
     @BindView(R.id.tv_step_detail_description) TextView mTvStep;
-    @BindView(R.id.iv_no_video) ImageView mIvNoVideo;
+    @BindView(R.id.iv_image_view_step) ImageView mIvImageStep;
 
     private SimpleExoPlayer mExoPlayer;
     private static MediaSessionCompat sMediaSession;
@@ -110,8 +113,8 @@ public class RecipeStepDetailViewFragment extends Fragment implements
         // save playing status of the player
         if(mExoPlayer != null)
         {
-            videoCurrentPosition = mExoPlayer.getCurrentPosition();
-            outState.putLong(VIDEO_PLAYER_STATE, videoCurrentPosition);
+            mVideoCurrentPosition = mExoPlayer.getCurrentPosition();
+            outState.putLong(VIDEO_PLAYER_STATE, mVideoCurrentPosition);
         }
 
     }
@@ -127,48 +130,111 @@ public class RecipeStepDetailViewFragment extends Fragment implements
 
         if(!isNetworkAvailable(getActivity()))
         {
-            Toast.makeText(getActivity(), getString(R.string.no_internet_connection),
-                    Toast.LENGTH_SHORT).show();
+            showImageHideVideo();
+            mIvImageStep.setImageResource(R.drawable.no_video);
+            showSnackbar(getActivity(), mTvStep, getString(R.string.no_internet_connection));
         }
         else
         {
-            // one of the two, if not, url will be empty.
-            String url = mStep.getmVideoUrl();
-            if(url.isEmpty())
-                url = mStep.getmThumbnailUrl();
+            // one of the two, video or image, if not, display empty image
+            String urlVideo = mStep.getmVideoUrl();
+            String urlImage = mStep.getmThumbnailUrl();
 
-            if(url == null || url.isEmpty())
+            if(!TextUtils.isEmpty(urlVideo))
             {
-                mPlayerView.setVisibility(View.GONE);
-                mIvNoVideo.setVisibility(View.VISIBLE);
-            }
-            else
-            {
-                // initialize the Media Session
-                initializeMediaSession();
-                // show player
-                mPlayerView.setVisibility(View.VISIBLE);
-                mIvNoVideo.setVisibility(View.GONE);
-                // initialize the player
-                initializePlayer(Uri.parse(url));
-
-                if (savedInstanceState != null)
+                // check for mistakes on the URL, it can be an image
+                if(isPicture(urlVideo))
                 {
-                    // restore player position
-                    videoCurrentPosition = savedInstanceState.getLong(VIDEO_PLAYER_STATE, 0);
-                    mExoPlayer.seekTo(videoCurrentPosition);
+                    setupImage(urlVideo);
                 }
+                else
+                {
+                    setupPlayer(urlVideo, savedInstanceState);
+                }
+            }
+            else if(!TextUtils.isEmpty(urlImage))
+            {
+                // check for mistakes on the URL, it can be a video
+                if(urlImage.endsWith(".mp4"))
+                {
+                    setupPlayer(urlImage, savedInstanceState);
+                }
+                else
+                {
+                    setupImage(urlImage);
+                }
+            }
+            else // we got nothing, display empty image
+            {
+                showImageHideVideo();
+                mIvImageStep.setImageResource(R.drawable.no_video);
             }
         }
     }
 
 
-    // Step info is going to be provided in here only in tablet view
+    private void setupPlayer(String urlVideo, Bundle savedInstanceState)
+    {
+        // initialize the Media Session
+        initializeMediaSession();
+        // show player
+        showVideoHideImage();
+        // initialize the player
+        initializePlayer(Uri.parse(urlVideo));
+
+        if (savedInstanceState != null)
+        {
+            // restore player position
+            mVideoCurrentPosition = savedInstanceState.getLong(VIDEO_PLAYER_STATE, 0);
+            mExoPlayer.seekTo(mVideoCurrentPosition);
+        }
+    }
+
+    private void setupImage(String urlImage)
+    {
+        showImageHideVideo();
+        Picasso
+                .with(getActivity())
+                .load(urlImage)
+                .placeholder(R.drawable.baking)
+                .error(R.drawable.no_video)
+                .into(mIvImageStep);
+    }
+
+
+    @Override
+    public void onResume()
+    {
+        super.onResume();
+
+        // gets the player back into the view if destroyed by onPause()
+        if(mExoPlayer == null)
+        {
+            if(!TextUtils.isEmpty(mStep.getmVideoUrl()))
+            {
+                setupPlayer(mStep.getmVideoUrl(), null);
+            }
+            else if(!TextUtils.isEmpty(mStep.getmThumbnailUrl())
+                && mStep.getmThumbnailUrl().endsWith(".mp4"))
+            {
+                setupPlayer(mStep.getmThumbnailUrl(), null);
+            }
+        }
+    }
+
+    /** Releases the player when the fragment is paused */
+    @Override
+    public void onPause() {
+        super.onPause();
+        releasePlayer();
+    }
+
+
+    /** Retrieves Step info - only for tablet devices */
     public void displayStepDetailView(Step step)
     {
         mStep = step;
     }
-
 
     private void initializeMediaSession()
     {
@@ -210,7 +276,7 @@ public class RecipeStepDetailViewFragment extends Fragment implements
             LoadControl loadControl = new DefaultLoadControl();
             mExoPlayer = ExoPlayerFactory.newSimpleInstance(getActivity(),
                     trackSelector, loadControl);
-            mPlayerView.setPlayer(mExoPlayer);
+            mPlayerViewStep.setPlayer(mExoPlayer);
 
             // Set the ExoPlayer.EventListener to this activity.
             mExoPlayer.addListener(this);
@@ -244,7 +310,7 @@ public class RecipeStepDetailViewFragment extends Fragment implements
      * PlayBackState to keep in sync, and post the media notification.
      * @param playWhenReady true if ExoPlayer is playing, false if it's paused.
      * @param playbackState int describing the state of ExoPlayer. Can be STATE_READY, STATE_IDLE,
-     *                      STATE_BUFFERING, or STATE_ENDED.
+     * STATE_BUFFERING, or STATE_ENDED.
      */
     @Override
     public void onPlayerStateChanged(boolean playWhenReady, int playbackState)
@@ -272,7 +338,7 @@ public class RecipeStepDetailViewFragment extends Fragment implements
 
 
     /**
-     * Media Session Callbacks, where all external clients control the player.
+     * Provides Media Session Callbacks, where all external clients control the player.
      */
     private class MySessionCallback extends MediaSessionCompat.Callback
     {
@@ -309,23 +375,30 @@ public class RecipeStepDetailViewFragment extends Fragment implements
     }
 
 
-    /**
-     * Release the player when the fragment is destroyed.
-     */
+    private void showImageHideVideo()
+    {
+        mPlayerViewStep.setVisibility(View.GONE);
+        mIvImageStep.setVisibility(View.VISIBLE);
+    }
+
+    private void showVideoHideImage()
+    {
+        mPlayerViewStep.setVisibility(View.VISIBLE);
+        mIvImageStep.setVisibility(View.GONE);
+    }
+
+
+    /** Releases the player when the fragment is destroyed */
     @Override
     public void onDestroy()
     {
         super.onDestroy();
         releasePlayer();
-        if(sMediaSession != null)
-            sMediaSession.setActive(false);
+        if(sMediaSession != null) sMediaSession.setActive(false);
     }
 
 
-
-    /**
-     * Release ExoPlayer.
-     */
+    /** Releases ExoPlayer */
     private void releasePlayer()
     {
         if (mExoPlayer != null)

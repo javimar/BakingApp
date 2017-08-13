@@ -4,6 +4,7 @@
 
     <!-- ERROR -->
     <string name="no_internet_connection">There is no Internet connection</string>
+    <string name="no_recipes">Couldn\'t load the recipes</string>
 
     <!-- CONTENT DESCRIPTION STRINGS -->
     <string name="cd_baking_image">Image of the baking app</string>
@@ -11,7 +12,8 @@
     <string name="cd_play_button">Image for the play button in the video player</string>
     <string name="cd_pause_button">Image for the pause button in the video player</string>
     <string name="cd_prev_button">Image for the previous button in the video player</string>
-    <string name="cd_no_video">Image to display when there is no video available</string>
+    <string name="cd_image_view_step">Image to display when there is no video available</string>
+    <string name="cd_recipe_image">Image to display of the recipe listing</string>
 
     <!-- STEP DETAIL VIEW FRAGMENT STRINGS -->
     <string name="detail_step_pager_strip">STEP </string>

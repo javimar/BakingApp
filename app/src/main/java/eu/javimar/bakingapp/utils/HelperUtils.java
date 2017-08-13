@@ -5,8 +5,12 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.preference.PreferenceManager;
 import android.support.annotation.ColorRes;
+import android.support.design.widget.Snackbar;
 import android.support.v4.content.ContextCompat;
+import android.text.TextUtils;
 import android.util.Log;
+import android.view.View;
+import android.widget.TextView;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -15,13 +19,18 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import eu.javimar.bakingapp.R;
 
+/**
+ * Utilities classs with helper methods
+ */
 public final class HelperUtils
 {
     private static final String LOG_TAG = HelperUtils.class.getName();
 
     // final class
     private HelperUtils() {}
+
 
     /** Returns true if the network is connected or about_layout to become available */
     public static boolean isNetworkAvailable(Context context)
@@ -41,7 +50,9 @@ public final class HelperUtils
     }
 
 
-    /** Loads the Recipes json file from assets into a string memory */
+    /** Loads the Recipes json file from assets into a string memory
+     *  (Currently not necessary since it gets it from the Internet)
+     */
     public static String loadJSONFromAsset(Context context)
     {
         String jsonString = null;
@@ -60,7 +71,7 @@ public final class HelperUtils
         return jsonString;
     }
 
-    // Stores the ingredients in the preferences for the widget
+    /** Stores the ingredients in the preferences for the widget */
     public static void storeIngredientsInPreferences(Context context, String recipeName,
                                                      List<String> ingredientList)
     {
@@ -71,7 +82,7 @@ public final class HelperUtils
         editor.apply();
     }
 
-
+    /** Gets list of ingredients from the SharedPreferences */
     public static String[] getIngredientsFromPreferences(Context context, String recipeName)
     {
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
@@ -79,7 +90,7 @@ public final class HelperUtils
         return set.toArray(new String[set.size()]);
     }
 
-    // returns the recipe names = the keys of the prefenrences
+    /** Returns the recipe names = the keys of the preferences */
     public static Set<String> getRecipeKeysFromPreferences(Context context)
     {
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
@@ -87,11 +98,29 @@ public final class HelperUtils
         return allEntries.keySet();
     }
 
+    /** Deletes step numbering to make step more consistent */
     public static String deletesStepNumber(String string)
     {
-        // Remove all numbers from steps
+        // Remove all numbers from stepsn
         return string.replaceAll("(^\\d\\.|\\d\\d\\.)", "");
     }
 
+    /** Displays colorful snackbar messages */
+    public static void showSnackbar (Context context, View view, String message)
+    {
+        Snackbar snack = Snackbar.make(view, message, Snackbar.LENGTH_LONG);
+        View sbview = snack.getView();
+        sbview.setBackgroundColor(fetchColor(context, R.color.primary_light));
+        TextView textView = sbview.findViewById(android.support.design.R.id.snackbar_text);
+        textView.setTextColor(ContextCompat.getColor(context, R.color.primary_dark));
+        snack.show();
+    }
+
+
+    /** Returns true if url string ends with an image extension */
+    public static boolean isPicture(String url) {
+        return !TextUtils.isEmpty(url) &&
+                (url.endsWith(".jpg") || url.endsWith(".png"));
+    }
 
 }

@@ -1,11 +1,16 @@
 package eu.javimar.bakingapp.view;
 
+import android.content.Context;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
+
+import com.squareup.picasso.Picasso;
 
 import java.util.List;
 
@@ -21,6 +26,8 @@ import static eu.javimar.bakingapp.MainActivity.sCardColor;
 public class RecipeListAdapter extends
         RecyclerView.Adapter<RecipeListAdapter.RecipeListHolder>
 {
+    private Context context;
+
     // The interface that receives onClick messages
     public interface ListRecipeClickListener
     {
@@ -31,9 +38,10 @@ public class RecipeListAdapter extends
     /**
      * Adapter constructor will receive an object that implements this interface
      */
-    public RecipeListAdapter(ListRecipeClickListener listener)
+    public RecipeListAdapter(ListRecipeClickListener listener, Context c)
     {
         mOnClickListener = listener;
+        context = c;
     }
 
 
@@ -64,6 +72,7 @@ public class RecipeListAdapter extends
     {
         @BindView(R.id.tv_recipe_name)TextView tvRecipeName;
         @BindView(R.id.recipe_card)CardView cvCard;
+        @BindView(R.id.iv_recipe_image)ImageView ivRecipeImage;
 
         public RecipeListHolder(View itemView)
         {
@@ -76,6 +85,20 @@ public class RecipeListAdapter extends
         {
             // set the name for recipe
             tvRecipeName.setText(recipe.getmRecipeName());
+
+            if(TextUtils.isEmpty(recipe.getmRecipeImage()))
+            {
+                ivRecipeImage.setImageResource(R.drawable.recipe_icon);
+            }
+            else
+            {
+                Picasso
+                        .with(context)
+                        .load(recipe.getmRecipeImage())
+                        .placeholder(R.drawable.baking)
+                        .error(R.drawable.recipe_icon)
+                        .into(ivRecipeImage);
+            }
 
             itemView.setOnClickListener(new View.OnClickListener()
             {

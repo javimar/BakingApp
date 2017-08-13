@@ -43,7 +43,10 @@ Allow a user to select a recipe and see video-guided steps for how to complete i
  */
 package eu.javimar.bakingapp;
 
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -55,6 +58,7 @@ import android.support.v7.graphics.Palette;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.ProgressBar;
@@ -66,7 +70,12 @@ import java.util.List;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import eu.javimar.bakingapp.model.Recipe;
+import eu.javimar.bakingapp.sync.LoaderIntentService;
+import eu.javimar.bakingapp.sync.LoadingTasks;
 import eu.javimar.bakingapp.view.RecipeListAdapter;
+
+import static eu.javimar.bakingapp.utils.HelperUtils.isNetworkAvailable;
+import static eu.javimar.bakingapp.utils.HelperUtils.showSnackbar;
 
 public class MainActivity extends AppCompatActivity implements RecipeListAdapter.ListRecipeClickListener
 {
@@ -78,13 +87,18 @@ public class MainActivity extends AppCompatActivity implements RecipeListAdapter
     @BindView(R.id.tv_error_message_display) TextView mErrorMessageDisplay;
     @BindView(R.id.pb_loading_indicator) ProgressBar mLoadingIndicator;
 
-    private final String KEY_RECYCLER_STATE = "recycler_state";
+    private RecipeListAdapter recipeListAdapter;
+
     public static String RECIPE_ITEM_PARCEABLE = "recipe_item_parceable";
 
     public static int sCardColor;
 
     // The Master List of Recipes where everything revolves around :-)
     public static List<Recipe> master_list = new ArrayList<>();
+
+    // IntentService notification logic
+    private RecipesLoadedReceiver receiver;
+    private IntentFilter intentFilter;
 
 
     @Override
@@ -95,7 +109,13 @@ public class MainActivity extends AppCompatActivity implements RecipeListAdapter
 
         ButterKnife.bind(this);
 
-        // Toolbar
+        // Dynamically register a BroadcastReceiver and create an intent-filter to notify loading
+        registerReceiver();
+
+        // loads the recipes via IntentService
+        loadRecipes();
+
+        // Toolbar logic
         setSupportActionBar(mToolbarMain);
 
         if(getResources().getBoolean(R.bool.isPhone)) // Only activate on phones
@@ -119,8 +139,8 @@ public class MainActivity extends AppCompatActivity implements RecipeListAdapter
             mRecyclerViewRecipes.setLayoutManager(new GridLayoutManager(this, 3));
         }
         mRecyclerViewRecipes.setHasFixedSize(true);
-        // link receipe data with the Views and pass MainActivity as listener
-        RecipeListAdapter recipeListAdapter = new RecipeListAdapter(this);
+        // link recipe data with the Views and pass MainActivity as listener and a context
+        recipeListAdapter = new RecipeListAdapter(this, this);
         // Setting the adapter attaches it to the RecyclerView in our layout
         mRecyclerViewRecipes.setAdapter(recipeListAdapter);
     }
@@ -162,4 +182,92 @@ public class MainActivity extends AppCompatActivity implements RecipeListAdapter
     }
 
 
+    private void loadRecipes()
+    {
+        if(isNetworkAvailable(this))
+        {
+            // load recipes from the internet if we have not already
+            if(master_list == null || master_list.size() < 1)
+            {
+                Intent loadRecipesIntent =
+                        new Intent(getApplicationContext(), LoaderIntentService.class);
+                loadRecipesIntent.setAction(LoadingTasks.ACTION_LOAD_RECIPES);
+                startService(loadRecipesIntent);
+            }
+        }
+        else
+        {
+            mLoadingIndicator.setVisibility(View.GONE);
+            showSnackbar(this, findViewById(android.R.id.content),
+                    getString(R.string.no_internet_connection));
+        }
+    }
+
+
+    public class RecipesLoadedReceiver extends BroadcastReceiver
+    {
+        public static final String RECIPES_LOADED_RESPONSE =
+                "eu.javimar.bakingapp.intent.action.RECIPES_LOADED_RESPONSE";
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            // we have everything loaded, hopefully
+            mLoadingIndicator.setVisibility(View.GONE);
+            if(master_list == null || master_list.size() < 1)
+            {
+                mErrorMessageDisplay.setVisibility(View.VISIBLE);
+            }
+            else
+            {
+                recipeListAdapter.notifyDataSetChanged();
+            }
+        }
+    }
+
+
+    private void registerReceiver()
+    {
+        intentFilter = new IntentFilter(RecipesLoadedReceiver.RECIPES_LOADED_RESPONSE);
+        intentFilter.addCategory(Intent.CATEGORY_DEFAULT);
+        receiver = new RecipesLoadedReceiver();
+        registerReceiver(receiver, intentFilter);
+    }
+
+
+    private void unregisterReceiver()
+    {
+        if (receiver!= null) this.unregisterReceiver(receiver);
+        receiver = null;
+        intentFilter = null;
+    }
+
+    @Override
+    public void onStart()
+    {
+        // When rotating screen we need to hide the progress bar
+        if(!master_list.isEmpty())
+        {
+            mLoadingIndicator.setVisibility(View.GONE);
+        }
+        // Register mReceiver when starting activity
+        if (receiver == null && intentFilter== null) registerReceiver();
+        super.onStart();
+    }
+
+    @Override
+    public void onStop()
+    {
+        // unregister mReceiver when stopping activity
+        unregisterReceiver();
+        super.onStop();
+    }
+
+
+    @Override
+    public void onDestroy()
+    {
+        // unregister mReceiver when destroying activity
+        unregisterReceiver();
+        super.onDestroy();
+    }
 }

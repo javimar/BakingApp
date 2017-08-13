@@ -4,6 +4,8 @@
     <dimen name="activity_margin_content">24dp</dimen>
     <dimen name="app_bar_height">192dp</dimen>
     <dimen name="card_view_height">200dp</dimen>
+    <dimen name="layout_padding">16dp</dimen>
+    <dimen name="text_size_recycler">16sp</dimen>
 
     <item name="line_spacing_value" format="float" type="dimen">1.2</item>
 
